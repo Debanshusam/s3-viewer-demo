@@ -1,5 +1,9 @@
 ## S3 Viewer with RBAC Prototype
 
+Based on https://www.jpmorgan.com/technology/technology-blog/protecting-web-applications-via-envoy-oauth2-filter
+
+Uses https://hidekuma.github.io/flask-s3-viewer/html/index.html
+
 ``` mermaid
 flowchart LR
     subgraph k8s
@@ -24,7 +28,7 @@ flowchart LR
     * envoyproxy/envoy-dev
     * ghcr.io/soluto/oidc-server-mock:latest
 * docker-compose
-* Python > 3.7
+* Python >= 3.7
 
 
 #### Steps
