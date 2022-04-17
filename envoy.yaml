@@ -37,6 +37,10 @@ static_resources:
               - "*"
               routes:
               - match:
+                  path: "/"
+                redirect:
+                  path_redirect: "/occ-s3-viewer/files"
+              - match:
                   prefix: "/"
                 route:
                   cluster: upstream-service
@@ -127,7 +131,7 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: localhost
+                address: occ-s3-viewer
                 port_value: 3000
 
   - name: oauth

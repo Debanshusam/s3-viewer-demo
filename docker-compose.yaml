@@ -1,5 +1,16 @@
 version: '2'
 services:
+  occ-s3-viewer:
+    container_name: occ-s3-viewer
+    image: occ-s3-viewer
+    ports:
+      - 3000:3000
+    environment:
+      S3_HOST: http://mini-io:9000
+      S3_ACCESS_KEY: FENUEPE4UL6LEEDA8DFY
+      S3_SECRET_KEY: vjSh6c+sbHrt2d2NoiDLjmgqqZqZCXWbyjkfzCzY
+      S3_BUCKET: scan-results
+      PORT: 3000
 
   mini-io:
     container_name: mini-io

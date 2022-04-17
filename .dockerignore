@@ -1,0 +1,7 @@
+__pycache__
+mini-io-state
+venv
+.env
+.gitignore
+docker-compose.yaml
+envoy.yaml
