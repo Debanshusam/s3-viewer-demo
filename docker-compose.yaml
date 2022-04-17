@@ -1,0 +1,130 @@
+version: '2'
+services:
+
+  mini-io:
+    container_name: mini-io
+    image: minio/minio
+    command: server /data --console-address ":9001" 
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./mini-io-state:/data
+  envoy-proxy:
+    container_name: envoy-proxy
+    image: envoyproxy/envoy-dev
+    ports:
+      - "10000:10000"
+      - "9901:9901"
+    depends_on:
+      - oidc-server-mock
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+  oidc-server-mock:
+    container_name: oidc-server-mock
+    image: ghcr.io/soluto/oidc-server-mock:latest
+    ports:
+      - "4011:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      API_SCOPES_INLINE: |
+        [
+          {
+            "Name": "s3-viewer",
+            "UserClaims": ["s3-viewer-envs"]
+          }
+        ]
+
+      API_RESOURCES_INLINE: |
+        [
+          {
+            "Name": "s3-viewer-app",
+            "Scopes": ["s3-viewer"],
+            "ApiSecrets": ["s3-viewer"],
+            "UserClaims": ["s3-viewer-envs"]
+          }
+        ]
+      SERVER_OPTIONS_INLINE: |
+        {
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          }
+        }
+      ACCOUNT_OPTIONS_INLINE: |
+        {
+          "AutomaticRedirectAfterSignOut": true
+        }
+      IDENTITY_RESOURCES_INLINE: |
+        [
+          {
+            "Name": "s3-viewer-2",
+            "ClaimTypes": ["s3-viewer-envs"]
+          }
+        ]
+      USERS_CONFIGURATION_INLINE: |
+        [
+          {
+            "SubjectId":"1",
+            "Username":"User1",
+            "Password":"pwd",
+            "Claims": [
+                {
+                "Type": "s3-viewer-envs",
+                "Value": "['sys-50', 'sys-51']",
+                "ValueType": "json"
+              }
+            ]
+          },
+          {
+            "SubjectId":"2",
+            "Username":"User2",
+            "Password":"pwd",
+            "Claims": [
+                {
+                "Type": "s3-viewer-envs",
+                "Value": "['sys-60']",
+                "ValueType": "json"
+              }
+            ]
+          }
+        ]
+      CLIENTS_CONFIGURATION_INLINE: |
+        [
+   
+              {
+                  "ClientId": "authorization-code-client-id",
+                  "ClientSecrets": ["authorization-code-client-secret"],
+                  "Description": "Client for authorization code flow",
+                  "AllowedGrantTypes": ["authorization_code"],
+                  "AllowAccessTokensViaBrowser": true,
+                  "RedirectUris": ["http://localhost:10000/callback","http://localhost:10000"],
+                  "RequirePkce": false,
+                  "AllowedScopes": ["openid", "profile", "email", "s3-viewer"],
+                  "IdentityTokenLifetime": 3600,
+                  "AccessTokenLifetime": 3600,
+                  "RequireClientSecret": false
+                  
+                 
+                },
+                {
+                  "ClientId": "client-credentials-flow-client-id",
+                  "ClientSecrets": ["client-credentials-flow-client-secret"],
+                  "Description": "Client for client credentials flow",
+                  "AllowedGrantTypes": ["client_credentials"],
+                  "AllowedScopes": ["s3-viewer"],
+                  "ClientClaimsPrefix": "",
+                  "Claims": [
+                    {
+                        "Type": "s3-viewer-envs",
+                        "Value": "['sys-50', 'sys-51']",
+                        "ValueType": "json"
+                    }
+                  ]
+                }
+        ]
+ 
