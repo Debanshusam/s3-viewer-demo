@@ -3,13 +3,17 @@
 ``` mermaid
 flowchart LR
     subgraph k8s
+        ingress
+        ingress-->envoy-proxy-sidecar
         subgraph pod
+            
             envoy-proxy-sidecar-->s3-viewer
         end
     end
-    user-->envoy-proxy-sidecar
-    user-->oidc-provider
-    envoy-proxy-sidecar-->oidc-provider
+    user-->|bearer token|ingress
+    user-.get token.->oidc-provider
+    envoy-proxy-sidecar-.verify token.->oidc-provider
+    s3[(S3)]
     s3-viewer-->s3
 ```
 
@@ -29,6 +33,7 @@ flowchart LR
 1. Clone this repo
 1. python -m venv env
 1. source ./env/bin/activate
+1. pip install -r requirements.txt
 1. run ./build-container.sh
 1. docker-compose up
 1. navigate to http://localhost:10000 , use User1/pwd for credentials
