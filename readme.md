@@ -18,7 +18,7 @@ flowchart LR
     user-.get token.->oidc-provider
     envoy-proxy-sidecar-.verify token.->oidc-provider
     s3[(S3)]
-    s3-viewer-->s3
+    s3-viewer-->|S3 Secret|s3
 ```
 
 ### Running
